@@ -2,13 +2,17 @@ package com.example.demo.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.model.Comment;
+import com.example.demo.model.Post;
 import com.example.demo.repo.CommentRepository;
 import com.example.demo.repo.PostRepository;
+
+import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -28,12 +32,21 @@ public class CommentController {
     }
 
     @PostMapping("/posts/{postId}/comments")
-    public Comment createComment(@PathVariable (value = "postId") Long postId,
+    public ResponseEntity<Comment> createComment(@PathVariable (value = "postId") Long postId,
                                  @Valid @RequestBody Comment comment) {
-        return postRepository.findById(postId).map(post -> {
-            comment.setPost(post);
-            return commentRepository.save(comment);
-        }).orElseThrow(() -> new ResourceNotFoundException("PostId " + postId + " not found"));
+    	Optional<Post> post = postRepository.findById(postId);
+    	 
+    		if(!post.isPresent()) {
+    			comment.setPost(post.get());
+    			commentRepository.save(comment);
+    		//	throw new NullPointerException("Just try to throw a null");
+    			
+    			return new  ResponseEntity<Comment>(comment, HttpStatus.OK);
+    		}
+    		else {
+    			return new ResponseEntity<Comment>(HttpStatus.NOT_FOUND);
+    		}
+    	
     }
 
     @PutMapping("/posts/{postId}/comments/{commentId}")

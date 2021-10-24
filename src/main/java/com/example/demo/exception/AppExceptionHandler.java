@@ -1,6 +1,7 @@
 package com.example.demo.exception;
 
 import java.util.Date;
+import java.util.NoSuchElementException;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
@@ -17,15 +18,22 @@ public class AppExceptionHandler extends ResponseEntityExceptionHandler {
 	public ResponseEntity<Object> handleAnyException(Exception ex, WebRequest request){
 		String errorDescription = ex.getLocalizedMessage();
 		if(errorDescription == null) errorDescription = ex.toString();
-		ErrorMessage errorMessage = new ErrorMessage( new Date(),errorDescription);
+		ErrorMessage errorMessage = new ErrorMessage( new Date(),"Adam able to handle any exception: "+ errorDescription);
 		return new ResponseEntity<>( errorMessage, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR );
 	}
 	
+
+	@ExceptionHandler(value = {NoSuchElementException.class})
+	public ResponseEntity<Object> handleNoSuchElementException(NoSuchElementException ex, WebRequest request){
+		StringBuilder errorDescription = new StringBuilder(ex.getClass()+": " + ex.getLocalizedMessage()); 
+		ErrorMessage errorMessage = new ErrorMessage( new Date(),"Adam found no element eception: " + errorDescription);
+		return new ResponseEntity<>( errorMessage, new HttpHeaders(), HttpStatus.NOT_FOUND );
+	}
 	@ExceptionHandler(value = {NullPointerException.class})
 	public ResponseEntity<Object> handleNullPointerException(NullPointerException ex, WebRequest request){
 		String errorDescription = ex.getLocalizedMessage();
 		if(errorDescription == null) errorDescription = ex.toString();
-		ErrorMessage errorMessage = new ErrorMessage( new Date(),errorDescription);
+		ErrorMessage errorMessage = new ErrorMessage( new Date(),"Adam found error: " + errorDescription);
 		return new ResponseEntity<>( errorMessage, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR );
 	}
 	@ExceptionHandler(value = {UserServiceException.class})
